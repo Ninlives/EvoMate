@@ -1,6 +1,5 @@
 package nl.mlatus.internal;
 
-import jdk.internal.loader.BuiltinClassLoader;
 import nl.mlatus.api.ClassHook;
 import nl.mlatus.api.HookLogger;
 import nl.mlatus.api.LoadClassParam;
