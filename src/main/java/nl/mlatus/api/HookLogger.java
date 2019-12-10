@@ -13,4 +13,8 @@ public class HookLogger {
         HookLogger.waring(String.format("Failed to hook method %s of class %s using module %s:\n %s",
                 method, className, module.getName(), msg));
     }
+    public static void success(String method, String className, Class module){
+        HookLogger.info(String.format("Successfully inject into method %s of class %s using module %s",
+                method, className, module.getName()));
+    }
 }

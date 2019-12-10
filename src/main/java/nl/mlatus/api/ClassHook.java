@@ -15,12 +15,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static nl.mlatus.api.HookLogger.failedToHook;
+import static nl.mlatus.api.HookLogger.success;
 import static nl.mlatus.internal.Constant.PRIMITIVE_TYPE_DESCRIPTORS;
 
 public abstract class ClassHook {
 
     public void handleLoadClass(LoadClassParam param) {}
-
 
     protected final void hookMethod(LoadClassParam param,
                                     Class hookClass,
@@ -94,60 +94,26 @@ public abstract class ClassHook {
         Method afterReturn = null;
         Method afterThrow = null;
 
-        for(Method method : hookClass.getDeclaredMethods()){
-            if(method.isAnnotationPresent(BeforeCall.class)){
-                if(null == beforeCall){
-                    if(checkHookMethod(method)) {
-                        beforeCall = method;
-                    } else {
-                        failedToHook(methodName, param.getClassName(), this.getClass(),
-                                "Hook method should accept and only accept one MethodHookParam as parameter.");
-                        param.setHooked(false);
-                        return;
-                    }
-                } else {
-                    failedToHook(methodName, param.getClassName(), this.getClass(),
-                            "Multiple method annotated with @BeforeCall.");
-                    param.setHooked(false);
-                    return;
+        try {
+            for (Method method : hookClass.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(BeforeCall.class)) {
+                    checkMultipleAssign(beforeCall, "BeforeCall", methodName, param);
+                    beforeCall = returnValidHookMethod(method, methodName, param);
                 }
-            }
 
-            if(method.isAnnotationPresent(AfterReturn.class)){
-                if(null == afterReturn){
-                    if(checkHookMethod(method)) {
-                        afterReturn = method;
-                    } else {
-                        failedToHook(methodName, param.getClassName(), this.getClass(),
-                                "Hook method should accept and only accept one MethodHookParam as parameter.");
-                        param.setHooked(false);
-                        return;
-                    }
-                } else {
-                    failedToHook(methodName, param.getClassName(), this.getClass(),
-                            "Multiple method annotated with @AfterReturn.");
-                    param.setHooked(false);
-                    return;
+                if (method.isAnnotationPresent(AfterReturn.class)) {
+                    checkMultipleAssign(afterReturn, "AfterReturn", methodName, param);
+                    afterReturn = returnValidHookMethod(method, methodName, param);
                 }
-            }
 
-            if(method.isAnnotationPresent(AfterThrow.class)){
-                if(null == afterThrow){
-                    if(checkHookMethod(method)) {
-                        afterThrow = method;
-                    } else {
-                        failedToHook(methodName, param.getClassName(), this.getClass(),
-                                "Hook method should accept and only accept one MethodHookParam as parameter.");
-                        param.setHooked(false);
-                        return;
-                    }
-                } else {
-                    failedToHook(methodName, param.getClassName(), this.getClass(),
-                            "Multiple method annotated with @AfterThrow.");
-                    param.setHooked(false);
-                    return;
+                if (method.isAnnotationPresent(AfterThrow.class)) {
+                    checkMultipleAssign(afterThrow, "AfterThrow", methodName, param);
+                    afterThrow = returnValidHookMethod(method, methodName, param);
                 }
             }
+        } catch (HookFailedError e){
+            param.setHooked(false);
+            return;
         }
 
         if(null == beforeCall && null == afterReturn && null == afterThrow){
@@ -205,8 +171,20 @@ public abstract class ClassHook {
         if(weaver.isSuccess()){
             param.setClassFileBuffer(cw.toByteArray());
             param.setHooked(true);
+            success(methodName, param.getClassName(), this.getClass());
         } else {
             param.setHooked(false);
+            failedToHook(methodName, param.getClassName(), this.getClass(),
+                    "Unknown reason, please check the name and parameter types of target method.");
+        }
+    }
+
+    private Method returnValidHookMethod(Method method, String methodName, LoadClassParam param) throws HookFailedError {
+        if(checkHookMethod(method)) return method;
+        else {
+            failedToHook(methodName, param.getClassName(), this.getClass(),
+                    "Hook method should be public static, accept and only accept one MethodHookParam as parameter.");
+            throw new HookFailedError();
         }
     }
 
@@ -224,4 +202,13 @@ public abstract class ClassHook {
         }
         return true;
     }
+
+    private void checkMultipleAssign(Method m, String annoName, String methodName, LoadClassParam param) throws HookFailedError {
+        if(null != m) {
+            failedToHook(methodName, param.getClassName(), this.getClass(),
+                    "Multiple method annotated with @" + annoName + ".");
+            throw new HookFailedError();
+        }
+    }
+    private static class HookFailedError extends Exception {}
 }
