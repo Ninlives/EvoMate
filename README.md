@@ -23,7 +23,7 @@ You can find the source code of these demos [here](demo).
 Here is a simple program for querying information of users by their position in the database, counting from 0.
 For example, if user input "0", the information of the first user in the database will be printed.
 
-![]()
+![](img/original.png)
 
 For simplicity, the "database" is just a static array contains a list of `User` objects.
 
@@ -93,8 +93,9 @@ public class Main {
         Scanner input = new Scanner(System.in);
         while (true){
             try {
-                System.out.println("Enter the number of the user you want to query: ");
+                System.out.print("Enter the number of the user you want to query: ");
                 Data.printUser(input.nextInt());
+                System.out.println();
             } catch (InputMismatchException e){
                 System.err.println("The input is not a valid number!");
                 input.nextLine();
@@ -149,9 +150,6 @@ public void handleLoadClass(LoadClassParam param) {
         case "nl.mlatus.example.Data":
             hookMethod(param, DataHook.class, "printUser", int.class);
             break;
-        case "nl.mlatus.example.User":
-            hookMethod(param, UserHook.class, "toString");
-            break;
     }
 }
 ```
@@ -199,7 +197,7 @@ Before starting the demo program, add these option to jvm:
 
 Let's see what will happen:
 
-![]()
+![](img/message.png)
 
 In addition to add some custom logic, `EvoMate` provides some extra ability to affect the behavior of the target method.
 For instance, counting from 0 is unnatural for many users, they want to count from 1.
@@ -218,7 +216,7 @@ public class DataHook {
 Parameters passed to target method can be changed by modifying the content of `param.args`.
 Rebuild the plug-in and load again to see if the changes have taken effect:
 
-![]()
+![](img/natural.png)
 
 The demo program did not check if the input value is out of range.
 Therefore, `ArrayIndexOutOfBoundsException` may be thrown by `printUser` and that is not handled.
@@ -287,4 +285,4 @@ public class Entry extends ClassHook {
 
 Rebuild and load the plug-in, this is what the program looks now:
 
-![]()
+![](img/final.png)
