@@ -8,7 +8,8 @@ public class Main {
         Scanner input = new Scanner(System.in);
         while (true){
             try {
-                System.out.println(Data.getUser(input.nextInt()));
+                System.out.println("Enter the number of the user you want to query: ");
+                Data.printUser(input.nextInt());
             } catch (InputMismatchException e){
                 System.err.println("The input is not a valid number!");
                 input.nextLine();

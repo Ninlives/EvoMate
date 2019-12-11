@@ -44,7 +44,7 @@ public class Constant {
             METHOD_HOOK_PARAM_CONSTRUCTOR_WITH_RESULT = Method.getMethod(MethodHookParam.class.getDeclaredConstructor(Object.class, Object.class, Object[].class));
             METHOD_HOOK_PARAM_CONSTRUCTOR_WITH_THROWABLE = Method.getMethod(MethodHookParam.class.getDeclaredConstructor(Throwable.class, Object.class, Object[].class));
         } catch (NoSuchMethodException e) {
-            HookLogger.waring("Failed to find constructor or get result method for MethodHookParam.");
+            HookLogger.warning("Failed to find constructor or get result method for MethodHookParam.");
             System.exit(1);
         }
     }

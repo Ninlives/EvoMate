@@ -32,9 +32,10 @@ public class Transformer implements ClassFileTransformer {
                 if (param.isHooked()) {
                     for (String path : ((AdviceClassLoader)advice.getClass().getClassLoader()).getJarPath()){
                         try {
-                            inst.appendToBootstrapClassLoaderSearch(new JarFile(path));
+                            // inst.appendToBootstrapClassLoaderSearch(new JarFile(path));
+                            inst.appendToSystemClassLoaderSearch(new JarFile(path));
                         } catch (IOException e) {
-                            HookLogger.waring(String.format("Failed to hook class %s using module %s, class remain unchanged: Module not loaded by URLClassLoader.",
+                            HookLogger.warning(String.format("Failed to hook class %s using module %s, class remain unchanged: Module not loaded by URLClassLoader.",
                                     param.getClassName(), advice.getClass().getName()));
                             e.printStackTrace();
                             return classfileBuffer;
@@ -62,7 +63,7 @@ public class Transformer implements ClassFileTransformer {
                     try {
                         inst.appendToSystemClassLoaderSearch(new JarFile(path));
                     } catch (IOException e) {
-                        HookLogger.waring(String.format("Failed to hook class %s using module %s, class remain unchanged: Module not loaded by URLClassLoader.",
+                        HookLogger.warning(String.format("Failed to hook class %s using module %s, class remain unchanged: Module not loaded by URLClassLoader.",
                                 param.getClassName(), advice.getClass().getName()));
                         e.printStackTrace();
                         return false;
@@ -83,12 +84,12 @@ public class Transformer implements ClassFileTransformer {
                     parentField.set(child, redirectClassLoader);
                     adviceClassLoader.setDefaultLoader(redirectClassLoader);
                 } catch (NoSuchFieldException e) {
-                    HookLogger.waring(String.format("Failed to hook class %s using module %s, class remain unchanged: Can't replace ClassLoader parent. ",
+                    HookLogger.warning(String.format("Failed to hook class %s using module %s, class remain unchanged: Can't replace ClassLoader parent. ",
                             param.getClassName(), advice.getClass().getName()));
                     resetClassLoader(param.getClassLoader());
                     return false;
                 } catch (IllegalAccessException e) {
-                    HookLogger.waring("Unknown error.");
+                    HookLogger.warning("Unknown error.");
                     e.printStackTrace();
                     System.exit(1);
                 }
@@ -99,7 +100,7 @@ public class Transformer implements ClassFileTransformer {
             }
             return true;
         } else {
-            HookLogger.waring(String.format("Failed to hook class %s using module %s, class remain unchanged: Module not loaded by URLClassLoader.",
+            HookLogger.warning(String.format("Failed to hook class %s using module %s, class remain unchanged: Module not loaded by URLClassLoader.",
                     param.getClassName(), advice.getClass().getName()));
             resetClassLoader(param.getClassLoader());
             return false;
@@ -115,7 +116,7 @@ public class Transformer implements ClassFileTransformer {
                 parentField.setAccessible(true);
                 parentField.set(loader, originalParent);
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                HookLogger.waring("Unknown error.");
+                HookLogger.warning("Unknown error.");
                 e.printStackTrace();
                 System.exit(1);
             }

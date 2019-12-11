@@ -1,13 +1,15 @@
 package nl.mlatus.example;
 
+import java.util.Date;
+
 public class User {
     private String name;
-    private String role;
+    private String email;
     private int    age;
 
-    public User(String name, String role, int age) {
+    public User(String name, String email, int age) {
         this.name = name;
-        this.role = role;
+        this.email = email;
         this.age = age;
     }
 
@@ -15,8 +17,8 @@ public class User {
         return name;
     }
 
-    public String getRole() {
-        return role;
+    public String getEmail() {
+        return email;
     }
 
     public int getAge() {
@@ -25,6 +27,6 @@ public class User {
 
     @Override
     public String toString(){
-        return String.format("%s %s %d", name, role, age);
+        return String.format("%s %s %d", name, email, age);
     }
 }

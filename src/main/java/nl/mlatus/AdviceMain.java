@@ -12,20 +12,29 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AdviceMain {
 
-    private static Logger logger = Logger.getLogger(AdviceMain.class.getName());
-
     public static void premain(String args, Instrumentation inst) {
-        logger.info("Load lib jar.");
+        Logger earlyLogger = Logger.getLogger("EvoMate");
+        Map<String, String> option = getOpt(args);
+        Level level = Level.WARNING;
+        if(option.containsKey("logLevel")){
+            try {
+                level = Level.parse(option.get("logLevel"));
+            } catch (IllegalArgumentException e){
+                earlyLogger.warning("Invalid value of option 'logLevel', use default value.");
+            }
+        }
+        HookLogger.init(level);
 
         URL agentURL = ClassLoader.
                 getSystemClassLoader().
                 getResource(AdviceMain.class.getCanonicalName().replace('.', '/') + ".class");
         if(null == agentURL){
-            HookLogger.waring("Can't find the lib jar.");
+            HookLogger.warning("Can't find the lib jar.");
             return;
         }
 
@@ -33,12 +42,11 @@ public class AdviceMain {
             String urlString = agentURL.getFile();
             URL file = new URL(urlString.substring(0, urlString.indexOf('!')));
             JarFile libJar = new JarFile(new File(file.toURI()));
-            inst.appendToBootstrapClassLoaderSearch(libJar);
+            //inst.appendToBootstrapClassLoaderSearch(libJar);
         } catch (IOException | URISyntaxException e) {
-            HookLogger.waring("Can't load the lib jar.");
+            HookLogger.warning("Can't load the lib jar.");
             return;
         }
-        Map<String, String> option = getOpt(args);
         AdviceManager.init(option, inst);
         inst.addTransformer(new Transformer(inst));
     }
