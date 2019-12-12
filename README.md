@@ -7,7 +7,7 @@ It makes use of the "Java Agent" mechanism provided by Java Virtual Machine(JVM)
 
 ```sh
 git clone https://github.com/Ninlives/EvoMate
-mvn insatll && mvn package
+mvn package
 ```
 
 You should see the `EvoMate.jar` in the `target` directory.
